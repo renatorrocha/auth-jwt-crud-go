@@ -27,6 +27,8 @@ func (uh UserHandler) SetRoutes() {
 	group.Post("", uh.Create)
 	group.Get("", uh.GetAll)
 	group.Get("/:id", uh.FindById)
+	group.Put("/:id", uh.Update)
+	group.Delete("/:id", uh.Delete)
 }
 
 func (uh UserHandler) Create(c *fiber.Ctx) error {
@@ -53,7 +55,7 @@ func (uh UserHandler) GetAll(c *fiber.Ctx) error {
 	users, err := uh.userService.GetAll()
 
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON("Erro ao buscar usuários")
+		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
 	}
 
 	return c.Status(http.StatusOK).JSON(users)
@@ -65,9 +67,46 @@ func (uh UserHandler) FindById(c *fiber.Ctx) error {
 	user, err := uh.userService.FindByID(id)
 
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON("Erro ao buscar o usuário")
+		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
 	}
 
 	return c.Status(http.StatusOK).JSON(user)
 
+}
+
+func (uh UserHandler) Update(c *fiber.Ctx) error {
+	var body structs.User
+	id := c.Params("id")
+
+	err := c.BodyParser(&body)
+
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
+	}
+
+	_, err = uh.userService.FindByID(id)
+
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
+	}
+
+	user, err := uh.userService.Update(body)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(structs.Response{Message: err.Error(), Code: http.StatusInternalServerError})
+	}
+
+	return c.Status(http.StatusOK).JSON(user)
+}
+
+func (uh UserHandler) Delete(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	err := uh.userService.Delete(id)
+
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
+	}
+
+	return c.Status(http.StatusOK).JSON(structs.Response{Message: "User deleted successfully", Code: http.StatusOK})
 }

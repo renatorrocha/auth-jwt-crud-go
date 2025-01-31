@@ -32,3 +32,14 @@ func (ur UserRepository) FindByID(id string) (*structs.User, error) {
 	err := ur.db.First(&user, id).Error
 	return &user, err
 }
+
+func (ur UserRepository) Update(user structs.User) (*structs.User, error) {
+	err := ur.db.Save(&user).Error
+	return &user, err
+}
+
+func (ur UserRepository) Delete(id string) error {
+	err := ur.db.Delete(&structs.User{}, id).Error
+
+	return err
+}

@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/renatorrocha/auth-jwt-go/src/config"
 	"github.com/renatorrocha/auth-jwt-go/src/structs"
@@ -13,23 +12,28 @@ import (
 func ConnectDB() {
 	var err error
 
-	p := config.Config("DATABASE_PORT")
+	// Verificar se as variáveis de ambiente estão definidas
+	dbHost := config.Config("DATABASE_HOST")
+	dbPort := config.Config("DATABASE_PORT")
+	dbUser := config.Config("DATABASE_USER")
+	dbPass := config.Config("DATABASE_PASSWORD")
+	dbName := config.Config("DATABASE_NAME")
 
-	// Convert port to uint (10 is the base, 32 is the bit size)
-	port, err := strconv.ParseUint(p, 10, 32)
-	if err != nil {
-		panic("failed to parse the database port")
+	// Verificar se alguma variável está vazia
+	if dbHost == "" || dbPort == "" || dbUser == "" || dbPass == "" || dbName == "" {
+		panic("As variáveis de ambiente do banco de dados não estão configuradas corretamente")
 	}
 
-	dsn := fmt.Sprintf("host=db port=%d user=%s password=%s dbname=%s sslmode=disable",
-		port,
-		config.Config("DATABASE_USER"),
-		config.Config("DATABASE_PASSWORD"),
-		config.Config("DATABASE_NAME"))
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbHost,
+		dbPort,
+		dbUser,
+		dbPass,
+		dbName)
 
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		panic(fmt.Sprintf("Falha ao conectar ao banco de dados: %v", err))
 	}
 
 	fmt.Println("Database connected successfully")

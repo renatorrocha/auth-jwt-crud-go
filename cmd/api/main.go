@@ -17,6 +17,8 @@ func main() {
 		return c.SendString("Pong")
 	})
 
+	database.ConnectDB()
+
 	repositoryContainer := repositories.GetRepositories(database.DB)
 	servicesContainer := services.GetServices(repositoryContainer)
 	handlers.NewHandlerContainer(app, servicesContainer)

@@ -35,13 +35,13 @@ func (uh UserHandler) Create(c *fiber.Ctx) error {
 	err := c.BodyParser(&body)
 
 	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON("error.Error()")
+		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
 	}
 
 	user, err := uh.userService.Create(body)
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON("Erro interno do servidor")
+		return c.Status(http.StatusInternalServerError).JSON(structs.Response{Message: err.Error(), Code: http.StatusInternalServerError})
 	}
 
 	return c.Status(http.StatusCreated).JSON(user)

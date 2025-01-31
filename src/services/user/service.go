@@ -24,6 +24,14 @@ func (us UserService) Create(user structs.User) (*structs.User, error) {
 		return nil, errors.New("user must be at least 18 years old")
 	}
 
+	if user.Email == "" {
+		return nil, errors.New("email is required")
+	}
+
+	if user.Name == "" {
+		return nil, errors.New("name is required")
+	}
+
 	return us.UserRepository.Create(user)
 }
 

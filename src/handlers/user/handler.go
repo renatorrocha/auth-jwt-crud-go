@@ -79,19 +79,18 @@ func (uh UserHandler) Update(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	err := c.BodyParser(&body)
-
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
 	}
 
-	_, err = uh.userService.FindByID(id)
-
+	existingUser, err := uh.userService.FindByID(id)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(structs.Response{Message: err.Error(), Code: http.StatusBadRequest})
 	}
+
+	body.ID = existingUser.ID
 
 	user, err := uh.userService.Update(body)
-
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(structs.Response{Message: err.Error(), Code: http.StatusInternalServerError})
 	}
